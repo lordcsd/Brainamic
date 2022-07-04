@@ -1,1 +1,1 @@
-web: rm -rf node_modules && rm ./package-lock.json && npm cache clean --force && npm run start:dev
+web: npm run start:prod
