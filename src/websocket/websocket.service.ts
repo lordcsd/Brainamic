@@ -69,7 +69,7 @@ export class WebSocketService {
   message(data) {
     data = JSON.parse(data);
     if (data.event == 'price') {
-      this.server.sockets.emit(`price@${data.symbol}`, data);
+      this.server.sockets.emit(`price@${data.symbol}`, data.data);
     }
   }
 }
