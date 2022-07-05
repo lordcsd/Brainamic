@@ -1,0 +1,13 @@
+{
+    "event": "price",
+    "symbol": "BTC/USD",
+    "currency_base": "Bitcoin",
+    "currency_quote": "US Dollar",
+    "exchange": "Coinbase Pro",
+    "type": "Digital Currency",
+    "timestamp": 1657011957,
+    "price": 19824.8,
+    "bid": 19824.8,
+    "ask": 19824.8,
+    "day_volume": 17130
+}

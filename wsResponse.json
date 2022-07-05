@@ -1,0 +1,14 @@
+{
+    "event": "subscribe-status",
+    "status": "ok",
+    "success": [
+        {
+            "symbol": "BTC/USD",
+            "exchange": "Coinbase Pro",
+            "mic_code": "Coinbase Pro",
+            "country": "",
+            "type": "Digital Currency"
+        }
+    ],
+    "fails": null
+}
