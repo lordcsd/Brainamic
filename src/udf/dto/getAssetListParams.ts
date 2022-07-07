@@ -1,36 +1,29 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsEnum, MinLength } from 'class-validator';
 
+export enum instrumentType {
+  crypto = 'crypto',
+  forex = 'forex',
+  indices = 'indices',
+  stock = 'stock',
+}
 export class getAssetListParams {
-  @ApiPropertyOptional({
-    type: Boolean,
-    default: true,
+  @ApiProperty({
+    description: 'Type of instrument to be fetched',
+    enum: instrumentType,
+    default: instrumentType.crypto,
   })
-  @IsBoolean()
-  @IsOptional()
-  indices?: boolean;
+  @IsEnum(instrumentType)
+  type: instrumentType;
+}
 
-  @ApiPropertyOptional({
-    type: Boolean,
-    default: true,
+export class getPriceAndVolume {
+  @ApiProperty({
+    description: 'List of symbols',
+    default: ['BTC/USD'],
+    type: Array,
   })
-  @IsBoolean()
-  @IsOptional()
-  crypto?: boolean;
-
-  @ApiPropertyOptional({
-    type: Boolean,
-    default: true,
-  })
-  @IsBoolean()
-  @IsOptional()
-  forex?: boolean;
-
-  @ApiPropertyOptional({
-    type: Boolean,
-    default: true,
-  })
-  @IsBoolean()
-  @IsOptional()
-  stock?: boolean;
+  @IsArray()
+  @MinLength(0)
+  symbols: string[];
 }

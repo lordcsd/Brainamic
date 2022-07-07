@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { MarketModule } from './market/market.module';
 import { UDFModule } from './udf/udf.module';
 import { WebsocketModule } from './websocket/webosocket.module';
 
@@ -9,9 +8,10 @@ import { WebsocketModule } from './websocket/webosocket.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     UDFModule,
+    MarketModule,
     WebsocketModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

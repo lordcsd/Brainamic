@@ -14,7 +14,10 @@ export class WebSocketService {
   constructor(
     @InjectWebSocketProvider() private readonly twelveDataWS: WebSocketClient,
   ) {
-    setInterval(() => this.server.send({ action: 'heartbeat' }), 9500);
+    setInterval(() => {
+      this.server.send({ action: 'heartbeat' });
+      console.log('sent heartbeat to keep websocket connection alive');
+    }, 9500);
   }
 
   listenedPairs = {};

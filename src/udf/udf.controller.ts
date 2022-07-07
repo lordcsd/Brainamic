@@ -3,16 +3,13 @@ import { ApiTags } from '@nestjs/swagger';
 import { getAssetListParams } from './dto/getAssetListParams';
 import { KlineParams } from './dto/klineParams.dto';
 import { symbolSearchParams } from './dto/symbolSearchParams';
-import { MarketService } from './market.service';
+import { MarketService } from '../market/market.service';
 import { UDFService } from './udf.service';
 
 @ApiTags('UDF')
 @Controller()
 export class UDFController {
-  constructor(
-    private udfService: UDFService,
-    private marketService: MarketService,
-  ) {}
+  constructor(private udfService: UDFService) {}
 
   @Get('/')
   async root() {
@@ -58,10 +55,5 @@ export class UDFController {
   @Get('/quotes')
   async getQuotes(@Query('symbols') symbols: string) {
     return this.udfService.quote(symbols);
-  }
-
-  @Get('/get-assets-list')
-  async getAssets(@Query() params: getAssetListParams) {
-    return this.marketService.getList(params);
   }
 }

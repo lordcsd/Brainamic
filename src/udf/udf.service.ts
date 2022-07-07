@@ -20,13 +20,15 @@ import { ResolveSymbolResponse } from './dto/resolveSymbol.dto';
 
 @Injectable()
 export class UDFService {
+  twelveDataRoot: string;
+  twelveDataAPIKey: string;
   constructor(
     private httpService: HttpService,
     private configService: ConfigService,
-  ) {}
-
-  twelveDataRoot = this.configService.get(constants.twelveData.baseURL);
-  twelveDataAPIKey = this.configService.get(constants.twelveData.apiKey);
+  ) {
+    this.twelveDataRoot = this.configService.get(constants.twelveData.baseURL);
+    this.twelveDataAPIKey = this.configService.get(constants.twelveData.apiKey);
+  }
 
   async httpGet(url: string) {
     return await firstValueFrom(
@@ -90,8 +92,8 @@ export class UDFService {
       exchanges: [
         {
           value: 'BINANCE',
-          name: 'Binance',
-          desc: 'Binance Exchange',
+          name: 'binance',
+          desc: 'binance Exchange',
         },
       ],
       symbols_types: [
