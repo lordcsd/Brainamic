@@ -4,12 +4,10 @@ export interface TradingViewConfig {
     name: string;
     desc: string;
   }[];
-  symbols_types: [
-    {
-      value: string;
-      name: string;
-    },
-  ];
+  symbols_types: {
+    value: string;
+    name: string;
+  }[];
   supported_resolutions: string[];
   supports_search: boolean;
   supports_group_request: boolean;

@@ -13,12 +13,7 @@ import { Server } from 'socket.io';
 export class WebSocketService {
   constructor(
     @InjectWebSocketProvider() private readonly twelveDataWS: WebSocketClient,
-  ) {
-    setInterval(() => {
-      this.server.send({ action: 'heartbeat' });
-      console.log('sent heartbeat to keep websocket connection alive');
-    }, 9500);
-  }
+  ) {}
 
   listenedPairs = {};
   server: Server;
@@ -56,6 +51,9 @@ export class WebSocketService {
   @OnOpen()
   open() {
     console.log('connection opened');
+    setInterval(() => {
+      this.server.send({ action: 'hearbeat' });
+    }, 9500);
   }
 
   @OnError()
@@ -63,9 +61,12 @@ export class WebSocketService {
     console.log('Connection due to error', err);
   }
 
+  closed = false;
+
   @OnClose()
   close() {
     console.log('Connection closed');
+    this.closed = true;
   }
 
   @EventListener('message')
@@ -73,6 +74,9 @@ export class WebSocketService {
     data = JSON.parse(data);
     if (data.event == 'price') {
       this.server.sockets.emit(`price@${data.symbol}`, data);
+    }
+    if (this.closed) {
+      console.log(data);
     }
   }
 }

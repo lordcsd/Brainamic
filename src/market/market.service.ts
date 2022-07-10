@@ -12,13 +12,26 @@ import {
   BrainamicResponseOk,
 } from 'src/common/returnTemplate';
 import { quoteStruct } from './dtos/quoteStruct';
+import { DataSource, Repository } from 'typeorm';
+import { InstrumentList } from 'src/entities/instrumentList.entity';
 
 @Injectable()
 export class MarketService {
+  instrumentListRepo: Repository<InstrumentList>;
   constructor(
     private udfSerice: UDFService,
     private httpService: HttpService,
-  ) {}
+    private dataSource: DataSource,
+  ) {
+    this.instrumentListRepo = dataSource.getRepository(InstrumentList);
+  }
+
+  async upsertList(data: any[]) {
+    return await this.instrumentListRepo.upsert(data, {
+      conflictPaths: ['symbol'],
+      skipUpdateIfNoValuesChanged: true,
+    });
+  }
 
   //get cyrpto symbols
   async getCryptoPairsList() {
@@ -27,13 +40,34 @@ export class MarketService {
       this.udfSerice.twelveDataRoot
     }/cryptocurrencies?${qs.stringify(options)}`;
     const { data } = await this.udfSerice.httpGet(url);
-    return data;
+    return data.map((_symbol) => ({
+      symbol: _symbol.symbol,
+      ticker: _symbol.symbol,
+      full_name: _symbol.currency_base,
+      name: _symbol.currency_base,
+      description: _symbol.currency_base,
+      exchange: 'Binance',
+      currency_code: _symbol.symbol,
+      listed_exchange: 'Binance',
+      type: instrumentType.crypto,
+    }));
   }
+
   //get index symbols
   async getIndicesList() {
     const url = `${this.udfSerice.twelveDataRoot}/indices`;
     const { data } = await this.udfSerice.httpGet(url);
-    return data;
+    return data.map((_symbol) => ({
+      symbol: _symbol.symbol,
+      ticker: _symbol.symbol,
+      full_name: _symbol.name,
+      name: _symbol.name,
+      description: _symbol.name,
+      exchange: '',
+      currency_code: _symbol.currency,
+      listed_exchange: '',
+      type: instrumentType.indices,
+    }));
   }
 
   //get stock symbols
@@ -43,28 +77,34 @@ export class MarketService {
       options,
     )}`;
     const { data } = await this.udfSerice.httpGet(url);
-    return data;
+    return data.map((_symbol) => ({
+      symbol: _symbol.symbol,
+      ticker: _symbol.symbol,
+      full_name: _symbol.name,
+      name: _symbol.name,
+      description: _symbol.name,
+      exchange: _symbol.exchange,
+      currency_code: _symbol.currency,
+      listed_exchange: _symbol.exchange,
+      type: instrumentType.stock,
+    }));
   }
 
   //get forex symbols
   async getForexList() {
     const url = `${this.udfSerice.twelveDataRoot}/forex_pairs`;
     const { data } = await this.udfSerice.httpGet(url);
-    return data;
-  }
-
-  localLists = {
-    crypto: { data: [], created: 0 },
-    forex: { data: [], created: 0 },
-    indices: { data: [], created: 0 },
-    stock: { data: [], created: 0 },
-  };
-
-  // localQuotes: { any: { data: quoteStruct } } = {} ;
-  localQuotes = {};
-
-  expired(timestamp: number, duration: 'day' | '2min') {
-    return +new Date() - timestamp > (duration == 'day' ? 86400000 : 120000);
+    return data.map((_symbol) => ({
+      symbol: _symbol.symbol,
+      ticker: _symbol.symbol,
+      full_name: _symbol.currency_base,
+      name: _symbol.currency_base,
+      description: _symbol.currency_base,
+      exchange: '',
+      currency_code: _symbol.symbol,
+      listed_exchange: '',
+      type: instrumentType.forex,
+    }));
   }
 
   async fetchList(type: string) {
@@ -76,9 +116,27 @@ export class MarketService {
     if (type == instrumentType.indices) returned = await this.getIndicesList();
     if (type == instrumentType.stock) returned = await this.getStockList();
 
-    this.localLists[type].data = returned;
-    this.localLists[type].created = +new Date();
     return returned;
+  }
+
+  //refresh list on database
+  async refreshLists() {
+    const types = [
+      instrumentType.crypto,
+      instrumentType.forex,
+      instrumentType.indices,
+      instrumentType.stock,
+    ];
+    for (const type of types) {
+      await this.upsertList(this.fetchList[type]);
+    }
+  }
+
+  // localQuotes: { any: { data: quoteStruct } } = {} ;
+  localQuotes = {};
+
+  expired(timestamp: number, duration: 'day' | '2min') {
+    return +new Date() - timestamp > (duration == 'day' ? 86400000 : 120000);
   }
 
   async getList(
@@ -87,12 +145,10 @@ export class MarketService {
     try {
       const { type } = params;
 
-      let returned;
-      if (this.expired(this.localLists[type].created, 'day')) {
-        returned = await this.fetchList(type);
-      } else {
-        returned = this.localLists[type].data;
-      }
+      const returned = await this.instrumentListRepo.find({
+        where: { type: type },
+      });
+      // const returned = await this.fetchList(type);
 
       return {
         status: 201,
@@ -171,4 +227,20 @@ export class MarketService {
       };
     }
   }
+
+  //refresh lists on database as soon as service starts
+  refresh = this.refreshLists()
+    .then((res) => {
+      console.log('Refreshed instrument lists');
+    })
+    .catch((err) => console.log('There was an error refreshing lists', err));
+
+  //refresh lists on database every 24hours
+  refreshEveryDay = setInterval(() => {
+    this.refreshLists()
+      .then((res) => {
+        console.log('Refreshed instrument lists');
+      })
+      .catch((err) => console.log('There was an error refreshing lists', err));
+  }, 1000 * 60 * 60 * 24);
 }

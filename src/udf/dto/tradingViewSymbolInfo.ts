@@ -4,9 +4,9 @@ export interface TradingViewSymbolInfo {
   name: string[];
   full_name: string[];
   description: string[];
-  exchange: string;
-  listed_exchange: string;
-  type: string;
+  exchange: string | string[];
+  listed_exchange: string | string[];
+  type: string | string[];
   currency_code: string[];
   session: string;
   timezone: string;

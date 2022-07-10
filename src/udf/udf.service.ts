@@ -17,17 +17,22 @@ import { TradingViewConfig } from './dto/tradingViewConfig';
 import { tradingViewIntervals } from './dto/intervals.dto';
 import { TradingViewSymbolInfo } from './dto/tradingViewSymbolInfo';
 import { ResolveSymbolResponse } from './dto/resolveSymbol.dto';
+import { DataSource, Repository } from 'typeorm';
+import { InstrumentList } from 'src/entities/instrumentList.entity';
 
 @Injectable()
 export class UDFService {
   twelveDataRoot: string;
   twelveDataAPIKey: string;
+  instrumentListRepo: Repository<InstrumentList>;
   constructor(
     private httpService: HttpService,
     private configService: ConfigService,
+    private dataSource: DataSource,
   ) {
     this.twelveDataRoot = this.configService.get(constants.twelveData.baseURL);
     this.twelveDataAPIKey = this.configService.get(constants.twelveData.apiKey);
+    this.instrumentListRepo = dataSource.getRepository(InstrumentList);
   }
 
   async httpGet(url: string) {
@@ -87,7 +92,10 @@ export class UDFService {
 
   //trading view config
   async getConfig(): Promise<TradingViewConfig> {
-    const url = `${this.twelveDataRoot}`;
+    const url = `${this.twelveDataRoot}/exchanges?source=docs`;
+    const _exchanges = await this.httpGet(url);
+
+    console.log(_exchanges);
     const config: TradingViewConfig = {
       exchanges: [
         {
@@ -95,11 +103,38 @@ export class UDFService {
           name: 'binance',
           desc: 'binance Exchange',
         },
+        {
+          value: 'NYSE',
+          name: 'NYSE',
+          desc: 'NYSE',
+        },
+        {
+          value: 'NYSE',
+          name: 'NYSE',
+          desc: 'NYSE',
+        },
+        {
+          value: 'NYSE',
+          name: 'NYSE',
+          desc: 'NYSE',
+        },
       ],
       symbols_types: [
         {
           value: 'crypto',
           name: 'Cryptocurrency',
+        },
+        {
+          value: 'forex',
+          name: 'Forex',
+        },
+        {
+          value: 'Indices',
+          name: 'Indices',
+        },
+        {
+          value: 'Stock',
+          name: 'Stock',
         },
       ],
       supported_resolutions: tradingViewIntervals,
@@ -114,16 +149,21 @@ export class UDFService {
 
   //get symbol info
   async getSymbolInfo(group: string): Promise<TradingViewSymbolInfo> {
+    const instruments = await this.instrumentListRepo.find();
     const symbolInformation: TradingViewSymbolInfo = {
-      symbol: [''],
-      ticker: [''],
-      name: [''],
-      full_name: [''],
-      description: [''],
-      exchange: 'RCKG',
-      listed_exchange: 'RCKG',
-      type: 'crypto',
-      currency_code: [''],
+      symbol: instruments.map((instruments) => instruments.symbol),
+      ticker: instruments.map((instruments) => instruments.ticker),
+      name: instruments.map((instruments) => instruments.name),
+      full_name: instruments.map((instruments) => instruments.full_name),
+      description: instruments.map((instruments) => instruments.description),
+      exchange: instruments.map((instruments) => instruments.exchange),
+      listed_exchange: instruments.map(
+        (instruments) => instruments.listed_exchange,
+      ),
+      type: instruments.map((instruments) => instruments.type),
+      currency_code: instruments.map(
+        (instruments) => instruments.currency_code,
+      ),
       session: '24x7',
       timezone: 'UTC',
       minmovement: 1,
