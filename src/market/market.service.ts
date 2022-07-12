@@ -25,17 +25,17 @@ export class MarketService {
   ) {
     this.instrumentListRepo = dataSource.getRepository(InstrumentList);
     //refresh lists on database as soon as service starts
-    // setTimeout(
-    //   () =>
-    //     this.refreshLists()
-    //       .then((res) => {
-    //         console.log('Refreshed instrument lists');
-    //       })
-    //       .catch((err) =>
-    //         console.log('There was an error refreshing lists', err),
-    //       ),
-    //   100,
-    // );
+    setTimeout(
+      () =>
+        this.refreshLists()
+          .then((res) => {
+            console.log('Refreshed instrument lists');
+          })
+          .catch((err) =>
+            console.log('There was an error refreshing lists', err),
+          ),
+      10000,
+    );
   }
 
   async upsertList(data: any[]) {
@@ -140,9 +140,9 @@ export class MarketService {
       instrumentType.stock,
     ];
     for (const type of types) {
-      console.log(type);
-      await this.upsertList(this.fetchList[type]);
+      await this.upsertList(await this.fetchList(type));
     }
+    console.log('Instrument Lists updated');
   }
 
   // localQuotes: { any: { data: quoteStruct } } = {} ;
