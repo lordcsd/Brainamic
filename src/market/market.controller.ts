@@ -17,7 +17,7 @@ export class MarketController {
   }
 
   @Get('/get-price-and-volume')
-  async getPriceAndVolume(@Body() params: getPriceAndVolume) {
+  async getPriceAndVolume(@Query() params: getPriceAndVolume) {
     return await this.marketService.getPriceAndVolume(params.symbols);
   }
 }

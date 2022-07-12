@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, MinLength } from 'class-validator';
+import { IsArray, IsEnum, IsString, MinLength } from 'class-validator';
 
 export enum instrumentType {
   crypto = 'crypto',
@@ -19,11 +19,11 @@ export class getAssetListParams {
 
 export class getPriceAndVolume {
   @ApiProperty({
-    description: 'List of symbols',
-    default: ['BTC/USD'],
-    type: Array,
+    description:
+      'List of symbols, takes a single symbol or a string of symbols seperated with the percentage "%" sign',
+    default: 'BTC/USD%ETH/USD',
+    type: String,
   })
-  @IsArray()
-  @MinLength(0)
-  symbols: string[];
+  @IsString()
+  symbols: string;
 }

@@ -25,17 +25,17 @@ export class MarketService {
   ) {
     this.instrumentListRepo = dataSource.getRepository(InstrumentList);
     //refresh lists on database as soon as service starts
-    setTimeout(
-      () =>
-        this.refreshLists()
-          .then((res) => {
-            console.log('Refreshed instrument lists');
-          })
-          .catch((err) =>
-            console.log('There was an error refreshing lists', err),
-          ),
-      100,
-    );
+    // setTimeout(
+    //   () =>
+    //     this.refreshLists()
+    //       .then((res) => {
+    //         console.log('Refreshed instrument lists');
+    //       })
+    //       .catch((err) =>
+    //         console.log('There was an error refreshing lists', err),
+    //       ),
+    //   100,
+    // );
   }
 
   async upsertList(data: any[]) {
@@ -179,15 +179,17 @@ export class MarketService {
   }
 
   async getPriceAndVolume(
-    symbols: string[],
+    symbols: string,
   ): Promise<BrainamicResponseOk | BrainamicResponseError> {
     try {
       const url = `${this.udfSerice.twelveDataRoot}/complex_data?apikey=${this.udfSerice.twelveDataAPIKey}`;
 
-      symbols = typeof symbols == 'string' ? [symbols] : symbols;
+      const _symbols: string[] = symbols.split('%');
+
+      console.log(_symbols);
 
       const options = JSON.stringify({
-        symbols: symbols,
+        symbols: _symbols,
         intervals: ['1day'],
         outputsize: 1,
         methods: ['quote'],
@@ -196,7 +198,7 @@ export class MarketService {
       let response: quoteStruct[] = [];
 
       const allAvailableLocally =
-        symbols
+        _symbols
           .filter((_symbol) => this.localQuotes[_symbol])
           .filter((_symbol) => !this.expired(_symbol['timestamp'], '2min'))
           .length == symbols.length;
