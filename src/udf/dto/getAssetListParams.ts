@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsString, MinLength } from 'class-validator';
+import { IsEnum, IsString } from 'class-validator';
 
 export enum instrumentType {
   crypto = 'crypto',
@@ -9,7 +9,8 @@ export enum instrumentType {
 }
 export class getAssetListParams {
   @ApiProperty({
-    description: 'Type of instrument to be fetched',
+    description:
+      'Type of instrument to be fetched, takes: crypto, forex, indices or stock',
     enum: instrumentType,
     default: instrumentType.crypto,
   })
