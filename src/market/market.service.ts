@@ -24,6 +24,18 @@ export class MarketService {
     private dataSource: DataSource,
   ) {
     this.instrumentListRepo = dataSource.getRepository(InstrumentList);
+    //refresh lists on database as soon as service starts
+    setTimeout(
+      () =>
+        this.refreshLists()
+          .then((res) => {
+            console.log('Refreshed instrument lists');
+          })
+          .catch((err) =>
+            console.log('There was an error refreshing lists', err),
+          ),
+      100,
+    );
   }
 
   async upsertList(data: any[]) {
@@ -128,6 +140,7 @@ export class MarketService {
       instrumentType.stock,
     ];
     for (const type of types) {
+      console.log(type);
       await this.upsertList(this.fetchList[type]);
     }
   }
@@ -197,6 +210,8 @@ export class MarketService {
           this.httpService.post(url, options).pipe(map((res) => res.data)),
         );
 
+        console.log(quoteData);
+
         const { data } = quoteData;
 
         response = data.map((quote) => {
@@ -220,6 +235,7 @@ export class MarketService {
         data: response,
       };
     } catch (err) {
+      console.log(err);
       return {
         status: 500,
         message: 'There was an issue getting data',
@@ -227,14 +243,6 @@ export class MarketService {
       };
     }
   }
-
-  //refresh lists on database as soon as service starts
-  refresh = this.refreshLists()
-    .then((res) => {
-      console.log('Refreshed instrument lists');
-    })
-    .catch((err) => console.log('There was an error refreshing lists', err));
-
   //refresh lists on database every 24hours
   refreshEveryDay = setInterval(() => {
     this.refreshLists()

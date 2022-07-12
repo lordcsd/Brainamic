@@ -5,7 +5,7 @@ export class KlineParams {
   @ApiProperty({
     type: String,
     description: 'The symbol to get the data for',
-    default: 'BTCUSDT',
+    default: 'BTC/USD',
   })
   @IsString()
   symbol: string;
