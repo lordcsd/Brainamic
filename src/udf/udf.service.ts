@@ -78,12 +78,11 @@ export class UDFService {
           h: response.values.map((value) => value.high),
           l: response.values.map((value) => value.low),
           c: response.values.map((value) => value.close),
-          v: response.values.map((value) => value.volume),
+          v: response.values.map((value) => value.volume || 0),
           s: 'ok',
         };
         return data;
       }
-      console.log({ url, response });
       return { s: 'no_data' };
     } catch (e) {
       console.log(e);
@@ -271,7 +270,7 @@ export class UDFService {
               high_price: response.high,
               low_price: response.low,
               prev_close_price: response.previous_close,
-              volume: response.volume,
+              volume: response.volume || 0,
             },
           };
 
