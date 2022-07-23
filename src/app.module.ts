@@ -14,7 +14,7 @@ import { WebsocketModule } from './websocket/webosocket.module';
         return {
           type: 'mysql',
           host: configService.get(constants.database.host),
-          port: +configService.get(constants.database.port),
+          // port: +configService.get(constants.database.port),
           username: configService.get(constants.database.username),
           password: configService.get<string>(constants.database.password),
           database: configService.get(constants.database.name),
